@@ -1,5 +1,7 @@
 #include "SFML/Graphics.hpp"
 #include "MiddleAverageFilter.h"
+#include "ball.h"
+#include "balls_controller.h"
 
 constexpr int WINDOW_X = 1024;
 constexpr int WINDOW_Y = 768;
@@ -7,30 +9,6 @@ constexpr int MAX_BALLS = 300;
 constexpr int MIN_BALLS = 100;
 
 Math::MiddleAverageFilter<float,100> fpscounter;
-
-struct Ball
-{
-    sf::Vector2f p;
-    sf::Vector2f dir;
-    float r = 0;
-    float speed = 0;
-};
-
-void draw_ball(sf::RenderWindow& window, const Ball& ball)
-{
-    sf::CircleShape gball;
-    gball.setRadius(ball.r);
-    gball.setPosition(ball.p.x, ball.p.y);
-    window.draw(gball);
-}
-
-void move_ball(Ball& ball, float deltaTime)
-{
-    float dx = ball.dir.x * ball.speed * deltaTime;
-    float dy = ball.dir.y * ball.speed * deltaTime;
-    ball.p.x += dx;
-    ball.p.y += dy;
-}
 
 void draw_fps(sf::RenderWindow& window, float fps)
 {
@@ -49,23 +27,27 @@ int main()
     std::vector<Ball> balls;
 
     // randomly initialize balls
+    balls.reserve(MAX_BALLS);
     for (int i = 0; i < (rand() % (MAX_BALLS - MIN_BALLS) + MIN_BALLS); i++)
     {
-        Ball newBall;
-        newBall.p.x = rand() % WINDOW_X;
-        newBall.p.y = rand() % WINDOW_Y;
-        newBall.dir.x = (-5 + (rand() % 10)) / 3.;
-        newBall.dir.y = (-5 + (rand() % 10)) / 3.;
-        newBall.r = 5 + rand() % 5;
-        newBall.speed = 30 + rand() % 30;
-        balls.push_back(newBall);
+        sf::Vector2f position;
+        position.x = rand() % WINDOW_X;
+        position.y = rand() % WINDOW_Y;
+        sf::Vector2f direction;
+        direction.x = (-5 + (rand() % 10)) / 3.;
+        direction.y = (-5 + (rand() % 10)) / 3.;
+        balls.push_back(Ball(position, direction, 5 + rand() % 5, 30 + rand() % 30));
     }
+    balls.shrink_to_fit();
 
    // window.setFramerateLimit(60);
 
     sf::Clock clock;
     float lastime = clock.restart().asSeconds();
 
+    BallsController controller{ std::shared_ptr<std::vector<Ball>>(&balls),
+    WINDOW_X,
+    WINDOW_Y };
     while (window.isOpen())
     {
 
@@ -92,15 +74,11 @@ int main()
         /// Как можно было-бы улучшить текущую архитектуру кода?
         /// Данный код является макетом, вы можете его модифицировать по своему усмотрению
 
-        for (auto& ball : balls)
-        {
-            move_ball(ball, deltaTime);
-        }
-
+        controller.update(deltaTime);
         window.clear();
-        for (const auto ball : balls)
+        for (auto &ball : balls)
         {
-            draw_ball(window, ball);
+            ball.draw(window);
         }
 
 		//draw_fps(window, fpscounter.getAverage());
