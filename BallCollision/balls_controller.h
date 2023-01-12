@@ -15,7 +15,6 @@ public:
 		int fieldHieght);
 	void update(float deltaTime);
 private:
-	void applyWallCollision();
 
 	BallsPtr balls;
 	int fieldWidth = 0;

@@ -7,12 +7,9 @@ Ball::Ball(const sf::Vector2f& position, const sf::Vector2f& direction,
 
 }
 
-void Ball::move(float deltaTime)
+void Ball::setPosition(const sf::Vector2f& pos)
 {
-    float dx = dir.x * speed * deltaTime;
-    float dy = dir.y * speed * deltaTime;
-    p.x += dx;
-    p.y += dy;
+    p = pos;
 }
 
 void Ball::draw(sf::RenderWindow& window)
