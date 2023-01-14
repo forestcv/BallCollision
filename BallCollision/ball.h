@@ -10,9 +10,10 @@ public:
         float radius,
         float speed = 0);
     void setPosition(const sf::Vector2f& pos);
-    //void move(float deltaTime);
     void draw(sf::RenderWindow& window);
-    //friend class BallsController;
+
+    double angle();
+    sf::Vector2f speedProjection();
 
 //private:
     sf::Vector2f p;

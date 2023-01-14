@@ -19,3 +19,17 @@ void Ball::draw(sf::RenderWindow& window)
     gball.setPosition(p.x, p.y);
     window.draw(gball);
 }
+
+double Ball::angle()
+{
+    return atan2(dir.y, dir.x);
+}
+
+sf::Vector2f Ball::speedProjection()
+{
+    sf::Vector2f speedXY;
+    double alpha = angle();
+    speedXY.x = speed * cos(alpha);
+    speedXY.y = speed * sin(alpha);
+    return speedXY;
+}

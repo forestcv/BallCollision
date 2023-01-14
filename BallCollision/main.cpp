@@ -81,7 +81,7 @@ int main()
             ball.draw(window);
         }
 
-		//draw_fps(window, fpscounter.getAverage());
+		draw_fps(window, fpscounter.getAverage());
 		window.display();
     }
     return 0;
