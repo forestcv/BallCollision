@@ -149,11 +149,13 @@
     <ClCompile Include="balls_controller.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ball.cpp" />
+    <ClCompile Include="utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ball.h" />
     <ClInclude Include="balls_controller.h" />
     <ClInclude Include="MiddleAverageFilter.h" />
+    <ClInclude Include="utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

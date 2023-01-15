@@ -5,12 +5,15 @@
 class Ball
 {
 public:
+    Ball() {}
     Ball(const sf::Vector2f& position,
         const sf::Vector2f& direction,
         float radius,
         float speed = 0);
     void setPosition(const sf::Vector2f& pos);
+    void setDirection(const sf::Vector2f& dir);
     void draw(sf::RenderWindow& window);
+
 
     double angle();
     sf::Vector2f speedProjection();
@@ -20,4 +23,8 @@ public:
     sf::Vector2f dir;
     float r = 0;
     float speed = 0;
+    
+    sf::Vector2f p_prev;
+    sf::Vector2f dir_prev;
+    float speed_prev = 0;
 };

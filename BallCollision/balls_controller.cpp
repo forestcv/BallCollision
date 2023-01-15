@@ -1,4 +1,5 @@
 #include "balls_controller.h"
+#include "utility.h"
 
 const double pi = 3.14159265358979323846;
 
@@ -18,13 +19,17 @@ static bool applyWallCollision(Ball& ball, const sf::Vector2f &nextPosition,
     bool isCollision = false;
     if (nextPosition.x <= 0 || nextPosition.x + ball.r * 2 >= fieldWidth)
     {
-        ball.dir.x = -ball.dir.x;
+        //ball.dir.x = -ball.dir.x;
+        ball.setDirection(sf::Vector2f{ -ball.dir.x , ball.dir.y });
         if (nextPosition.x + ball.r * 2 >= fieldWidth)
         {
-            if(fieldWidth - nextPosition.x > ball.r * 2)
-                ball.p.x = (fieldWidth - ball.r) * 2 - nextPosition.x;
+            if (fieldWidth - nextPosition.x > ball.r * 2)
+                //ball.p.x = (fieldWidth - ball.r) * 2 - nextPosition.x;
+                ball.setPosition(sf::Vector2f{ (fieldWidth - ball.r) * 2 - nextPosition.x,
+                    ball.p.y });
             else
-                ball.p.x = fieldWidth - ball.r * 2;
+                //ball.p.x = fieldWidth - ball.r * 2;
+                ball.setPosition(sf::Vector2f{ fieldWidth - ball.r * 2 , ball.p.y });
         }
         else
         {
@@ -34,17 +39,21 @@ static bool applyWallCollision(Ball& ball, const sf::Vector2f &nextPosition,
     }
     if (nextPosition.y <= 0 || nextPosition.y + ball.r * 2 >= fieldHieght)
     {
-        ball.dir.y = -ball.dir.y;
+        //ball.dir.y = -ball.dir.y;
+        ball.setDirection(sf::Vector2f{ball.dir.x , -ball.dir.y});
         if (nextPosition.y + ball.r * 2 >= fieldHieght)
         {
             if (fieldHieght - nextPosition.y > ball.r * 2)
-                ball.p.y = (fieldHieght - ball.r) * 2 - nextPosition.y;
+                //ball.p.y = (fieldHieght - ball.r) * 2 - nextPosition.y;
+                ball.setPosition(sf::Vector2f{ ball.p.x, (fieldHieght - ball.r) * 2 - nextPosition.y });
             else
-                ball.p.y = fieldHieght - ball.r * 2;
+                //ball.p.y = fieldHieght - ball.r * 2;
+                ball.setPosition(sf::Vector2f{ ball.p.x, fieldHieght - ball.r * 2 });
         }
         else
         {
-            ball.p.y = -nextPosition.y;
+            //ball.p.y = -nextPosition.y;
+            ball.setPosition(sf::Vector2f{ ball.p.x, -nextPosition.y });
         }
         isCollision = true;
     }
@@ -103,10 +112,11 @@ static void ballCollisionSolver(Ball& first, Ball& second)
 static void applyBallIntersection(Ball& ball,
     float intersection, float deltaTime)
 {
-    double alpha = pi - ball.angle();
-    ball.p.x = ball.p.x - intersection * cos(alpha);
-    ball.p.y = ball.p.y - intersection * sin(alpha);
-    ball.p = nextPosition(ball, deltaTime);
+    //double alpha = pi - ball.angle();
+    //ball.p.x = ball.p.x - intersection * cos(alpha);
+    //ball.p.y = ball.p.y - intersection * sin(alpha);
+    ball.setPosition(nextPosition(ball, -deltaTime));
+    ball.setPosition(nextPosition(ball, deltaTime));
 }
 
 static bool applyBallCollision(Ball& first, Ball& second, float deltaTime)
@@ -116,12 +126,99 @@ static bool applyBallCollision(Ball& first, Ball& second, float deltaTime)
     double intersection = first.r + second.r - distance;
     if (intersection >= 0)
     {
-        double intersectionTime = intersection / first.speed;
+        double intersectionTime = intersection / (first.speed + second.speed);
+        
+        /*
+        if (first.r < second.r)
+        {
+            auto intersectionPoints = utility::findCircleLineIntersection(first.p_prev,
+                first.p,
+                second.p,
+                second.r);
+            if (intersectionPoints.empty())
+            {
+                return false;
+            }
+            sf::Vector2f intersectionPt;
+            if (intersectionPoints.size() == 2)
+            {
+                bool isFirstOnSegment = utility::isPointOnSegment(first.p_prev, first.p, intersectionPoints[0]);
+                bool isSecondOnSegment = utility::isPointOnSegment(first.p_prev, first.p, intersectionPoints[1]);
+                if(isFirstOnSegment && isSecondOnSegment)
+                {
+                    if (utility::distance(first.p_prev, intersectionPoints[0]) <
+                        utility::distance(first.p_prev, intersectionPoints[1]))
+                    {
+                        intersectionPt = intersectionPoints[0];
+                    }
+                    else
+                    {
+                        intersectionPt = intersectionPoints[1];
+                    }
+                }
+                else if (isFirstOnSegment)
+                {
+                    intersectionPt = intersectionPoints[0];
+                }
+                else
+                {
+                    intersectionPt = intersectionPoints[1];
+                }
+            }
+            else
+            {
+                intersectionPt = intersectionPoints[0];
+            }
+            intersectionTime = utility::distance(intersectionPt, first.p);
+        }
+        else
+        {
+            auto intersectionPoints = utility::findCircleLineIntersection(second.p_prev,
+                second.p,
+                first.p,
+                first.r);
+            if (intersectionPoints.empty())
+            {
+                return false;
+            }
+            sf::Vector2f intersectionPt;
+            if (intersectionPoints.size() == 2)
+            {
+                bool isFirstOnSegment = utility::isPointOnSegment(second.p_prev, second.p, intersectionPoints[0]);
+                bool isSecondOnSegment = utility::isPointOnSegment(second.p_prev, second.p, intersectionPoints[1]);
+                if (isFirstOnSegment && isSecondOnSegment)
+                {
+                    if (utility::distance(second.p_prev, intersectionPoints[0]) <
+                        utility::distance(second.p_prev, intersectionPoints[1]))
+                    {
+                        intersectionPt = intersectionPoints[0];
+                    }
+                    else
+                    {
+                        intersectionPt = intersectionPoints[1];
+                    }
+                }
+                else if (isFirstOnSegment)
+                {
+                    intersectionPt = intersectionPoints[0];
+                }
+                else
+                {
+                    intersectionPt = intersectionPoints[1];
+                }
+            }
+            else
+            {
+                intersectionPt = intersectionPoints[0];
+            }
+            intersectionTime = utility::distance(intersectionPt, second.p);
+        }
+        */
 
         ballCollisionSolver(first, second);
 
-        applyBallIntersection(first, intersection, intersectionTime);
-        applyBallIntersection(second, intersection, intersectionTime);
+            applyBallIntersection(first, intersection, intersectionTime);
+            applyBallIntersection(second, intersection, intersectionTime);
 
         return true;
     }

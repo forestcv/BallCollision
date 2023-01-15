@@ -9,7 +9,14 @@ Ball::Ball(const sf::Vector2f& position, const sf::Vector2f& direction,
 
 void Ball::setPosition(const sf::Vector2f& pos)
 {
+    p_prev = p;
     p = pos;
+}
+
+void Ball::setDirection(const sf::Vector2f& direction)
+{
+    dir_prev = dir;
+    dir = direction;
 }
 
 void Ball::draw(sf::RenderWindow& window)
