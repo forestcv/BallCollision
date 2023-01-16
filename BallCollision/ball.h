@@ -12,6 +12,7 @@ public:
     void move(double deltaTime);
     void move(double speed, double deltaTime);
     void move(const sf::Vector2f& direction, double speed, double deltaTime);
+    float radius() const;
     double speed() const ;
     const sf::Vector2f& position() const;
     const sf::Vector2f& direction() const;
@@ -21,6 +22,7 @@ public:
     void setPosition(const sf::Vector2f& pos);
     void setDirection(const sf::Vector2f& dir);
     void setSpeed(double speed_);
+    // расстояние до начала координат
     double distanceFromOrigin() const;
     void draw(sf::RenderWindow& window) const;
 
@@ -35,11 +37,11 @@ public:
         float speed = 0;
     };
 
-    float r = 0;
 
 private:
     State currentState;
     State prevState;
 
+    float r = 0;
     float distance_from_origin = 0;
 };

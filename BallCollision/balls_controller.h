@@ -15,6 +15,7 @@ public:
 		int fieldHieght);
 	void update(float deltaTime);
 private:
+	void processBallsColisions(float deltaTime);
 
 	BallsPtr balls;
 	int fieldWidth = 0;

@@ -30,13 +30,10 @@ int main()
     balls.reserve(MAX_BALLS);
     for (int i = 0; i < (rand() % (MAX_BALLS - MIN_BALLS) + MIN_BALLS); i++)
     {
-        sf::Vector2f position;
-        position.x = rand() % WINDOW_X;
-        position.y = rand() % WINDOW_Y;
-        sf::Vector2f direction;
-        direction.x = (-5 + (rand() % 10)) / 3.;
-        direction.y = (-5 + (rand() % 10)) / 3.;
-        balls.push_back(Ball(position, direction, 5 + rand() % 5, 30 + rand() % 30));
+        balls.push_back(Ball(sf::Vector2f(rand() % WINDOW_X, rand() % WINDOW_Y),
+            sf::Vector2f((-5 + (rand() % 10)) / 3., (-5 + (rand() % 10)) / 3.),
+            5 + rand() % 5, 
+            30 + rand() % 30));
     }
     balls.shrink_to_fit();
 
@@ -64,15 +61,6 @@ int main()
         float deltaTime = current_time - lastime;
         fpscounter.push(1.0f / (current_time - lastime));
         lastime = current_time;
-
-        /// <summary>
-        /// TODO: PLACE COLLISION CODE HERE 
-        /// объекты создаются в случайном месте на плоскости со случайным вектором скорости, имеют радиус R
-        /// Объекты движутся кинетически. Пространство ограниченно границами окна
-        /// Напишите обработчик столкновений шаров между собой и краями окна. Как это сделать эффективно?
-        /// Массы пропорцианальны площадям кругов, описывающих объекты 
-        /// Как можно было-бы улучшить текущую архитектуру кода?
-        /// Данный код является макетом, вы можете его модифицировать по своему усмотрению
 
         controller.update(deltaTime);
         window.clear();

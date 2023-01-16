@@ -3,55 +3,42 @@
 
 #include <algorithm>
 
-const double pi = 3.14159265358979323846;
+// количество интервалов деления времени рассчета при точном определнии
+// места столкновения шаров
+static const int descritisationParts = 5;
 
-static bool applyWallCollision(Ball& ball,
-    int fieldWidth, int fieldHieght)
+// функция-обработчик столкновений с краями экрана
+static bool applyWallCollision(Ball& ball, int fieldWidth, int fieldHieght)
 {
     bool isCollision = false;
-    if (ball.position().x <= 0 || (ball.position().x + ball.r * 2 >= fieldWidth))
+    // просчет столкновения с левым и правым краями экрана
+    if (ball.position().x <= 0 || (ball.position().x + ball.radius() * 2 >= fieldWidth))
     {
-        //ball.dir.x = -ball.dir.x;
         ball.setDirection(sf::Vector2f{ -ball.direction().x , ball.direction().y });
-        if (ball.position().x + ball.r * 2 >= fieldWidth)
-        {
-            if (fieldWidth - ball.position().x > ball.r * 2)
-                //ball.p.x = (fieldWidth - ball.r) * 2 - nextPosition.x;
-                ball.setPosition(sf::Vector2f{ (fieldWidth - ball.r) * 2 - ball.position().x,
-                    ball.previousPosition().y });
-            else
-                //ball.p.x = fieldWidth - ball.r * 2;
-                ball.setPosition(sf::Vector2f{ fieldWidth - ball.r * 2 , ball.previousPosition().y });
-        }
+        // правый край
+        if (ball.position().x + ball.radius() * 2 >= fieldWidth)
+                ball.setPosition(sf::Vector2f{ fieldWidth - ball.radius() * 2 , ball.previousPosition().y });
+        // левый край
         else
-        {
             ball.setPosition(sf::Vector2f{ -ball.position().x, ball.position().y });
-        }
         isCollision = true;
     }
-    if (ball.position().y <= 0 || (ball.position().y + ball.r * 2 >= fieldHieght))
+    // просчет столкновения с верхним и нижним краями экрана
+    if (ball.position().y <= 0 || (ball.position().y + ball.radius() * 2 >= fieldHieght))
     {
-        //ball.dir.y = -ball.dir.y;
         ball.setDirection(sf::Vector2f{ball.direction().x , -ball.direction().y});
-        if (ball.position().y + ball.r * 2 >= fieldHieght)
-        {
-            if (fieldHieght - ball.position().y > ball.r * 2)
-                //ball.p.y = (fieldHieght - ball.r) * 2 - nextPosition.y;
-                ball.setPosition(sf::Vector2f{ ball.previousPosition().x, (fieldHieght - ball.r) * 2 - ball.position().y });
-            else
-                //ball.p.y = fieldHieght - ball.r * 2;
-                ball.setPosition(sf::Vector2f{ ball.previousPosition().x, fieldHieght - ball.r * 2 });
-        }
+        // нижний край
+        if (ball.position().y + ball.radius() * 2 >= fieldHieght)
+                ball.setPosition(sf::Vector2f{ ball.previousPosition().x, fieldHieght - ball.radius() * 2 });
+        // верхний край
         else
-        {
-            //ball.p.y = -nextPosition.y;
             ball.setPosition(sf::Vector2f{ ball.previousPosition().x, -ball.position().y });
-        }
         isCollision = true;
     }
     return isCollision;
 }
 
+// расчет проекций скоростей после столкновения
 static std::tuple<double, double> calcSpeedProjectionAfterHit(double firstSpeed,
     double secondSpeed,
     double firstMass,
@@ -67,14 +54,16 @@ static std::tuple<double, double> calcSpeedProjectionAfterHit(double firstSpeed,
     return std::tuple<double, double>(newFirstSpeed, newSecondSpeed);
 }
 
+// функция рассчета параметров движения шаров после столкновения
 static void ballCollisionSolver(Ball& first, Ball& second)
 {
     // получение проекций скоростей до столкновения
     sf::Vector2f firstSpeed = first.speedProjection();
     sf::Vector2f secondSpeed = second.speedProjection();
 
-    double firstSquareRadius = first.r * first.r;
-    double secondSquareRadius = second.r * second.r;
+    // рассчет квадратов радиусов шаров - аналог масс
+    double firstSquareRadius = first.radius() * first.radius();
+    double secondSquareRadius = second.radius() * second.radius();
 
     // расчет проекций скростей после столкновения
     auto [newFirstSpeedX, newSecondSpeedX] = calcSpeedProjectionAfterHit(firstSpeed.x,
@@ -86,53 +75,47 @@ static void ballCollisionSolver(Ball& first, Ball& second)
                                                                         firstSquareRadius,
                                                                         secondSquareRadius);
 
+    // расчет скоростей по их проекциям
     first.setSpeed(sqrt(newFirstSpeedX * newFirstSpeedX + newFirstSpeedY * newFirstSpeedY));
     second.setSpeed(sqrt(newSecondSpeedX * newSecondSpeedX + newSecondSpeedY * newSecondSpeedY));
 
+    // расчет направления движения после удара
     first.setDirection(sf::Vector2f(newFirstSpeedX / first.speed(),
         newFirstSpeedY / first.speed()));
     second.setDirection(sf::Vector2f(newSecondSpeedX / second.speed(),
         newSecondSpeedY / second.speed()));
 }
 
-static void applyBallIntersection(Ball& ball, float deltaTime)
-{
-    ball.move(-ball.previousSpeed(), deltaTime);
-}
-
+// функция, определяющая положения пространства и параметры движения шаров после столкновения
 static bool applyBallCollision(Ball& first, Ball& second, float deltaTime)
 {
+    // расстояние между центрами шаров
     double distance = utility::distance(first.position(), second.position());
-    double intersection = first.r + second.r - distance;
+    double intersection = first.radius() + second.radius() - distance;
     if (intersection >= 0)
     {
-        //double intersectionTime = intersection / (first.speed() + second.speed());
-        double firstDistance = utility::distance(first.previousPosition(), first.position());
-        double secondDistance = utility::distance(second.previousPosition(), second.position());
-
-        ballCollisionSolver(first, second);
-
-        //applyBallIntersection(first, intersectionTime);
-        //applyBallIntersection(second, intersectionTime);
-
-        distance = utility::distance(first.position(), second.position());
-        intersection = first.r + second.r - distance;
-        double intersectionTime = 0;
-        while (first.r + second.r - utility::distance(first.position(), second.position()) >= 0 && intersectionTime <= deltaTime)
+        // уточнение места столкновения шаров
+        double intersectionTime = 0;    // время движения шаров после столкновения
+        // дискрета по времени для расчета места столкновения
+        double dTime = deltaTime / descritisationParts; 
+        while (intersection >= 0 && intersectionTime <= deltaTime)
         {
-            first.move(first.previousDirection(), -first.previousSpeed(), deltaTime / 10);
-            second.move(second.previousDirection(), -second.previousSpeed(), deltaTime / 10);
-            intersectionTime += deltaTime / 10;
+            // двигаем шары в обратном направлении
+            first.move(-first.direction(), first.speed(), dTime);
+            second.move(-second.direction(), second.speed(), dTime);
+            intersectionTime += dTime;
+
+            // определение текущего расстояния между шарами
+            distance = utility::distance(first.position(), second.position());
+            intersection = first.radius() + second.radius() - distance;
         }
 
-        distance = utility::distance(first.position(), second.position());
-        intersection = first.r + second.r - distance;
+        // расчет параметров шаров после столкновения
+        ballCollisionSolver(first, second);
 
-        //first.move(intersectionTime);
-        //second.move(intersectionTime);
-
-        distance = utility::distance(first.position(), second.position());
-        intersection = first.r + second.r - distance;
+        // движение шаров после столкновения
+        first.move(intersectionTime);
+        second.move(intersectionTime);
 
         return true;
     }
@@ -146,19 +129,36 @@ BallsController::BallsController(const BallsPtr& balls,
     fieldWidth(fieldWidth),
     fieldHieght(fieldHieght)
 {
-
+    // предварительная проверка и разрешение коллизий шаров
+    processBallsColisions(1);
 }
 
 void BallsController::update(float deltaTime)
 {
+    // расчет нового положения шаров
     for (auto& ball : *balls)
     {
         ball.move(deltaTime);
+        // проверка на коллизии с краями  экрана
         applyWallCollision(ball, fieldWidth, fieldHieght);
     }
 
-    std::sort(balls->begin(), balls->end(), 
-        [](const Ball& first, const Ball& second) 
+    processBallsColisions(deltaTime);
+}
+
+/*
+Оптимизация просчета коллизий шаров построена на том,
+что предварительно шары сортируются по расстоянию от начала координат,
+затем в цикле при достижении шара, расстояние которого от центра координат
+больше, чем аналогиченое расстояние для текущего шара плюс его диаметр
+(они точно не могут пересекаться), просчет коллизий для текущего шара прекращается.
+Таким образом, продвижение по циклу обсчета коллизий шаров становится
+значительно быстрее
+*/
+void BallsController::processBallsColisions(float deltaTime)
+{
+    std::sort(balls->begin(), balls->end(),
+        [](const Ball& first, const Ball& second)
         {
             return first.distanceFromOrigin() < second.distanceFromOrigin();
         });
@@ -167,11 +167,11 @@ void BallsController::update(float deltaTime)
     {
         for (int j = i + 1; j < balls->size(); j++)
         {
-            if (balls->operator[](j).distanceFromOrigin() - 
+            if (balls->operator[](j).distanceFromOrigin() -
                 balls->operator[](i).distanceFromOrigin() <=
-                balls->operator[](i).r)
-                applyBallCollision(balls->operator[](i), 
-                    balls->operator[](j), 
+                balls->operator[](i).radius())
+                applyBallCollision(balls->operator[](i),
+                    balls->operator[](j),
                     deltaTime);
             else
                 break;
