@@ -97,8 +97,7 @@ static void ballCollisionSolver(Ball& first, Ball& second)
 
 static void applyBallIntersection(Ball& ball, float deltaTime)
 {
-    ball.move(ball.previousSpeed(), -deltaTime);
-    ball.move(deltaTime);
+    ball.move(-ball.previousSpeed(), deltaTime);
 }
 
 static bool applyBallCollision(Ball& first, Ball& second, float deltaTime)
@@ -107,12 +106,33 @@ static bool applyBallCollision(Ball& first, Ball& second, float deltaTime)
     double intersection = first.r + second.r - distance;
     if (intersection >= 0)
     {
-        double intersectionTime = intersection / (first.speed() + second.speed());
+        //double intersectionTime = intersection / (first.speed() + second.speed());
+        double firstDistance = utility::distance(first.previousPosition(), first.position());
+        double secondDistance = utility::distance(second.previousPosition(), second.position());
 
         ballCollisionSolver(first, second);
 
-        applyBallIntersection(first, intersectionTime);
-        applyBallIntersection(second, intersectionTime);
+        //applyBallIntersection(first, intersectionTime);
+        //applyBallIntersection(second, intersectionTime);
+
+        distance = utility::distance(first.position(), second.position());
+        intersection = first.r + second.r - distance;
+        double intersectionTime = 0;
+        while (first.r + second.r - utility::distance(first.position(), second.position()) >= 0)
+        {
+            first.move(-first.previousSpeed(), deltaTime / 10);
+            second.move(-second.previousSpeed(), deltaTime / 10);
+            intersectionTime += deltaTime / 10;
+        }
+
+        distance = utility::distance(first.position(), second.position());
+        intersection = first.r + second.r - distance;
+
+        first.move(intersectionTime);
+        second.move(intersectionTime);
+
+        distance = utility::distance(first.position(), second.position());
+        intersection = first.r + second.r - distance;
 
         return true;
     }
