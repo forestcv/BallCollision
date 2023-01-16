@@ -10,7 +10,7 @@ using BallsPtr = std::shared_ptr<std::vector<Ball>>;
 class BallsController
 {
 public:
-	BallsController(BallsPtr balls, 
+	BallsController(const BallsPtr &balls, 
 		int fieldWidth,
 		int fieldHieght);
 	void update(float deltaTime);

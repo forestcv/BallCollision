@@ -6,7 +6,7 @@
 constexpr int WINDOW_X = 1024;
 constexpr int WINDOW_Y = 768;
 constexpr int MAX_BALLS = 300;
-constexpr int MIN_BALLS = 100;
+constexpr int MIN_BALLS = MAX_BALLS - 1;
 
 Math::MiddleAverageFilter<float,100> fpscounter;
 

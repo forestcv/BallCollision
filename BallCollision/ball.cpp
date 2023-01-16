@@ -3,53 +3,101 @@
 
 Ball::Ball(const sf::Vector2f& position, const sf::Vector2f& direction,
     float radius, float speed) :
-    p(position), dir(direction), r(radius), speed(speed)
+    r(radius)
 {
-    distance_from_origin = utility::distance(sf::Vector2f(0, 0), p);
+    currentState.pos = position;
+    currentState.dir = direction;
+    currentState.speed = speed;
+    prevState = currentState;
+    distance_from_origin = utility::distance(sf::Vector2f(0, 0), currentState.pos);
+}
+
+void Ball::move(double deltaTime)
+{;
+    float dx = currentState.dir.x * currentState.speed * deltaTime;
+    float dy = currentState.dir.y * currentState.speed * deltaTime;
+    setPosition(currentState.pos + sf::Vector2f(dx, dy));
+}
+
+void Ball::move(double speed, double deltaTime)
+{
+    float dx = currentState.dir.x * speed * deltaTime;
+    float dy = currentState.dir.y * speed * deltaTime;
+    setPosition(currentState.pos + sf::Vector2f(dx, dy));
+}
+
+double Ball::speed() const
+{
+    return currentState.speed;
+}
+
+const sf::Vector2f& Ball::position() const
+{
+    return currentState.pos;
+}
+
+const sf::Vector2f& Ball::direction() const
+{
+    return currentState.dir;
+}
+
+double Ball::previousSpeed() const
+{
+    return prevState.speed;
+}
+
+const sf::Vector2f& Ball::previousPosition() const
+{
+    return prevState.pos;
+}
+
+const sf::Vector2f& Ball::previousDirection() const
+{
+    return prevState.dir;
 }
 
 void Ball::setPosition(const sf::Vector2f& pos)
 {
-    p_prev = p;
-    p = pos;
-    distance_from_origin = utility::distance(sf::Vector2f(0, 0), p);
+    prevState.pos = currentState.pos;
+    currentState.pos = pos;
+    distance_from_origin = utility::distance(sf::Vector2f(0, 0), currentState.pos);
 }
 
 void Ball::setDirection(const sf::Vector2f& direction)
 {
-    dir_prev = dir;
-    dir = direction;
+    prevState.dir = currentState.dir;
+    currentState.dir = direction;
 }
 
-void Ball::setSpeed(double speed_)
+void Ball::setSpeed(double speed) 
 {
-    speed_prev = speed;
-    speed = speed_;
+    prevState.speed = currentState.speed;
+    currentState.speed = speed;
 }
 
-double Ball::distanceFromOrigin()
+double Ball::distanceFromOrigin() const
 {
     return distance_from_origin;
 }
 
-void Ball::draw(sf::RenderWindow& window)
+void Ball::draw(sf::RenderWindow& window) const
 {
     sf::CircleShape gball;
     gball.setRadius(r);
-    gball.setPosition(p.x, p.y);
+    gball.setPosition(currentState.pos.x, currentState.pos.y);
     window.draw(gball);
 }
 
-double Ball::angle()
+double Ball::angle() const
 {
-    return atan2(dir.y, dir.x);
+    return atan2(currentState.dir.y, currentState.dir.x);
 }
 
-sf::Vector2f Ball::speedProjection()
+sf::Vector2f Ball::speedProjection() const
 {
-    sf::Vector2f speedXY;
+    sf::Vector2f speed;
     double alpha = angle();
-    speedXY.x = speed * cos(alpha);
-    speedXY.y = speed * sin(alpha);
-    return speedXY;
+    speed.x = currentState.speed * cos(alpha);
+    speed.y = currentState.speed * sin(alpha);
+    return speed;
 }
