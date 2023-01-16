@@ -13,6 +13,16 @@ static sf::Vector2f nextPosition(const Ball &ball, float deltaTime)
     return nextPos;
 }
 
+static sf::Vector2f nextPosition(const Ball& ball, double speed, float deltaTime)
+{
+    sf::Vector2f nextPos;
+    float dx = ball.dir.x * speed * deltaTime;
+    float dy = ball.dir.y * speed * deltaTime;
+    nextPos.x = ball.p.x + dx;
+    nextPos.y = ball.p.y + dy;
+    return nextPos;
+}
+
 static bool applyWallCollision(Ball& ball, const sf::Vector2f &nextPosition,
     int fieldWidth, int fieldHieght)
 {
@@ -95,9 +105,9 @@ static void ballCollisionSolver(Ball& first, Ball& second)
                                                                         firstSquareRadius,
                                                                         secondSquareRadius);
     auto [newFirstSpeedY, newSecondSpeedY] = calcSpeedProjectionAfterHit(firstSpeed.y,
-        secondSpeed.y,
-        firstSquareRadius,
-        secondSquareRadius);
+                                                                        secondSpeed.y,
+                                                                        firstSquareRadius,
+                                                                        secondSquareRadius);
 
     first.speed = sqrt(newFirstSpeedX * newFirstSpeedX + newFirstSpeedY * newFirstSpeedY);
     second.speed = sqrt(newSecondSpeedX * newSecondSpeedX + newSecondSpeedY * newSecondSpeedY);
@@ -115,7 +125,7 @@ static void applyBallIntersection(Ball& ball,
     //double alpha = pi - ball.angle();
     //ball.p.x = ball.p.x - intersection * cos(alpha);
     //ball.p.y = ball.p.y - intersection * sin(alpha);
-    ball.setPosition(nextPosition(ball, -deltaTime));
+    ball.setPosition(nextPosition(ball, ball.speed_prev, -deltaTime));
     ball.setPosition(nextPosition(ball, deltaTime));
 }
 
@@ -217,8 +227,8 @@ static bool applyBallCollision(Ball& first, Ball& second, float deltaTime)
 
         ballCollisionSolver(first, second);
 
-            applyBallIntersection(first, intersection, intersectionTime);
-            applyBallIntersection(second, intersection, intersectionTime);
+        applyBallIntersection(first, intersection, intersectionTime);
+        applyBallIntersection(second, intersection, intersectionTime);
 
         return true;
     }
