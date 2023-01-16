@@ -26,6 +26,13 @@ void Ball::move(double speed, double deltaTime)
     setPosition(currentState.pos + sf::Vector2f(dx, dy));
 }
 
+void Ball::move(const sf::Vector2f& direction, double speed, double deltaTime)
+{
+    float dx = direction.x * speed * deltaTime;
+    float dy = direction.y * speed * deltaTime;
+    setPosition(currentState.pos + sf::Vector2f(dx, dy));
+}
+
 double Ball::speed() const
 {
     return currentState.speed;

@@ -118,18 +118,18 @@ static bool applyBallCollision(Ball& first, Ball& second, float deltaTime)
         distance = utility::distance(first.position(), second.position());
         intersection = first.r + second.r - distance;
         double intersectionTime = 0;
-        while (first.r + second.r - utility::distance(first.position(), second.position()) >= 0)
+        while (first.r + second.r - utility::distance(first.position(), second.position()) >= 0 && intersectionTime <= deltaTime)
         {
-            first.move(-first.previousSpeed(), deltaTime / 10);
-            second.move(-second.previousSpeed(), deltaTime / 10);
+            first.move(first.previousDirection(), -first.previousSpeed(), deltaTime / 10);
+            second.move(second.previousDirection(), -second.previousSpeed(), deltaTime / 10);
             intersectionTime += deltaTime / 10;
         }
 
         distance = utility::distance(first.position(), second.position());
         intersection = first.r + second.r - distance;
 
-        first.move(intersectionTime);
-        second.move(intersectionTime);
+        //first.move(intersectionTime);
+        //second.move(intersectionTime);
 
         distance = utility::distance(first.position(), second.position());
         intersection = first.r + second.r - distance;

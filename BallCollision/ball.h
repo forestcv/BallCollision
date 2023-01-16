@@ -11,6 +11,7 @@ public:
         float speed = 0);
     void move(double deltaTime);
     void move(double speed, double deltaTime);
+    void move(const sf::Vector2f& direction, double speed, double deltaTime);
     double speed() const ;
     const sf::Vector2f& position() const;
     const sf::Vector2f& direction() const;
